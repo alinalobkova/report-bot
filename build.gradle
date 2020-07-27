@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    configurations.maybeCreate('pitest')
+    dependencies {
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.0'
+        pitest 'org.pitest:pitest-junit5-plugin:0.9'
+        pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.1.0'
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.3.2.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+}
+
+group = 'com.github.alinalobkova'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+configurations {
+    implementation.exclude module: 'spring-boot-starter-logging'
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+wrapper {
+    gradleVersion = '6.0.1'
+}
+
+repositories {
+    mavenCentral()
+}
+apply plugin: "info.solidsoft.pitest"
+
+
+pitest {
+    testPlugin = "junit5"
+    targetClasses = ['ru.phoenixdnr.reportbot.*']
+    threads = 2
+    outputFormats = ['HTML', 'XML']
+    timestampedReports = false
+    enableDefaultIncrementalAnalysis = true
+}
+
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
+    runtimeOnly 'mysql:mysql-connector-java'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'org.apache.poi:poi:3.17'
+    implementation 'org.apache.poi:poi-ooxml:3.17'
+    implementation 'org.apache.poi:ooxml-schemas:1.3'
+    implementation group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+    implementation 'com.github.pengrad:java-telegram-bot-api:3.6.0'
+
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: "junit", module: "junit"
+        exclude module: "junit-vintage-engine"
+    }
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation("org.mockito:mockito-junit-jupiter")
+}
+
+test {
+    useJUnitPlatform()
+}
+
