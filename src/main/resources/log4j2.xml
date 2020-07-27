@@ -1,0 +1,96 @@
+<Configuration>
+    <Properties>
+        <Property name="log-path">logs-report-bot</Property>
+        <Property name="period-for-delete-archives">90d</Property> <!--Через какой период архивы логов будут удалены.
+                                                                    Пример: 90d - архивы будут удалены через 90 дней после создания-->
+        <Property name="max-accumulated-archives-size">50MB</Property> <!--Максимальный суммарный объём архивов логов.
+        Если это объём превышен, логи старше периода ${period-for-accumulate-archives-size} будут удалены (не все, только самые старые и удалятся до указанного размера).
+        Этот параметр относится к каждому файл-аппендеру отдельно, т.е. если у вас 4 файла и значение данного параметра 50Mb, то максимальный объём всех архивов - 50MB-->
+        <Property name="period-for-accumulate-archives-size">7d
+        </Property> <!--Период, после которого считается суммарный объём архивов. Смотри ${max-accumulated-archives-size}-->
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" charset="UTF-8"/>
+        </Console>
+        <RollingFile name="InfoLogFile" fileName="${log-path}/info.log"
+                     filePattern="${log-path}/info/$${date:yyyy-MM}/info-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout charset="UTF-8">
+                <Pattern>%d{DEFAULT} [%-5p] %c - %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${log-path}/info" maxDepth="2">
+                    <IfFileName glob="*/info-*.log.gz">
+                        <IfAny>
+                            <IfLastModified age="${period-for-delete-archives}"/>
+                            <IfLastModified age="${period-for-accumulate-archives-size}">
+                                <IfAccumulatedFileSize exceeds="${max-accumulated-archives-size}"/>
+                            </IfLastModified>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <RollingFile name="ErrorLogFile" fileName="${log-path}/error.log"
+                     filePattern="${log-path}/error/$${date:yyyy-MM}/error-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout charset="UTF-8">
+                <Pattern>%d{DEFAULT} [%-5p] %c - %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${log-path}/error" maxDepth="2">
+                    <IfFileName glob="*/error-*.log.gz">
+                        <IfAny>
+                            <IfLastModified age="${period-for-delete-archives}"/>
+                            <IfLastModified age="${period-for-accumulate-archives-size}">
+                                <IfAccumulatedFileSize exceeds="${max-accumulated-archives-size}"/>
+                            </IfLastModified>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <RollingFile name="DebugLogFile" fileName="${log-path}/debug.log"
+                     filePattern="${log-path}/debug/$${date:yyyy-MM}/debug-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout charset="UTF-8">
+                <Pattern>%d{DEFAULT} [%-5p] %c - %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${log-path}/debug" maxDepth="2">
+                    <IfFileName glob="*/debug-*.log.gz">
+                        <IfAny>
+                            <IfLastModified age="${period-for-delete-archives}"/>
+                            <IfLastModified age="${period-for-accumulate-archives-size}">
+                                <IfAccumulatedFileSize exceeds="${max-accumulated-archives-size}"/>
+                            </IfLastModified>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO" additivity="false">
+            <AppenderRef ref="InfoLogFile" level="INFO"/>
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="ErrorLogFile" level="ERROR"/>
+        </Root>
+        <Logger name="com.github.alinalobkova.reportbot" level="DEBUG" additivity="false">
+            <AppenderRef ref="DebugLogFile" level="DEBUG"/>
+            <AppenderRef ref="InfoLogFile" level="INFO"/>
+            <AppenderRef ref="ErrorLogFile" level="ERROR"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+    </Loggers>
+</Configuration>
