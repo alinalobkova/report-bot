@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "idTelegram": "92622207",
+      "name": "Test"
+    }
+  ],
+  "reports": [
+    {
+      "id": "1",
+      "name": "Report",
+      "sql": "select now()",
+      "source": "SMS",
+      "cron": "*/2 * * * * *",
+      "type": "EXCEL",
+      "users": [
+        1
+      ]
+    }
+  ]
+}
